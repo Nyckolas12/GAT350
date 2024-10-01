@@ -12,6 +12,9 @@ int main(int argc, char* argv[])
     {
         renderer->BeginFrame();
         renderer->EndFrame();
+
+
+
     }
 
 
