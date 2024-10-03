@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
     bool quit = false;
 
     SDL_Event event;
-    while (SDL_PollEvent(&event))
+    while(SDL_PollEvent(&event))
     {
         if (event.type == SDL_QUIT)
         {
@@ -24,35 +24,35 @@ int main(int argc, char* argv[])
         {
             quit = true;
         }
-    framebuffer.Clear(color_t{255,0,0,255});
-
-    framebuffer.DrawPoint(10, 10, {255,255,255,255});
-    for (int i = 0; i < 100; i++)
-    {
-        int x = rand() % 400;
-        int y = rand() % 300;
-        framebuffer.DrawPoint(x, y, { 255,255,255,255 });
-    }
     
+    }
+
+    while (true) 
+    {
+    framebuffer.Clear(color_t{0,0,0,0});
+    renderer.BeginFrame();
+    //framebuffer.DrawPoint(10, 10, {255,255,255,255});
+    for (int i = 0; i < 300; i++)
+     {
+        int x = rand() % framebuffer.m_width;
+        int y = rand() % framebuffer.m_height;
+        int x2 = rand() % framebuffer.m_width;
+        int x3 = rand() % framebuffer.m_width;
+        int y2 = rand() % framebuffer.m_height;
+        int y3 = rand() % framebuffer.m_height;
+        framebuffer.DrawPoint(x, y, { 55,100,156,255 });
+       // framebuffer.DrawLine(x, y, x2, y2, { 255,45,67 });
+        //framebuffer.DrawRect(x, y, 40, 40, { 255,255,255 });
+        //framebuffer.DrawTrianlge(x, y, x2, y2, x3, y3, { 255,56,76,255 });
+        }
     framebuffer.Update();
     renderer.CopyFramebuffer(framebuffer);
-    renderer.BeginFrame();
-    
-   
-   // renderer.EndFrame();
+
+    renderer.EndFrame();
+
     }
-    // clear screen
-   
-    
-
 
     
-   // SDL_RenderPresent(renderer.m_renderer);
-
-       
-    
-
-
 
     return 0;
 }

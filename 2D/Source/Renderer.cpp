@@ -50,10 +50,11 @@ void Renderer::BeginFrame()
     
     // clear screen
     
-    SDL_RenderPresent(m_renderer);
+    SDL_RenderClear(m_renderer);
 }
 
 void Renderer::EndFrame()
 {
-    SDL_RenderClear(m_renderer);
+    SDL_RenderPresent(m_renderer);
+    
 }
