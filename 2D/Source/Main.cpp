@@ -26,9 +26,9 @@ int main(int argc, char* argv[])
         }
     
     }
-
-    while (true) 
+    while (true)
     {
+
     framebuffer.Clear(color_t{0,0,0,0});
     renderer.BeginFrame();
     //framebuffer.DrawPoint(10, 10, {255,255,255,255});
@@ -40,16 +40,17 @@ int main(int argc, char* argv[])
         int x3 = rand() % framebuffer.m_width;
         int y2 = rand() % framebuffer.m_height;
         int y3 = rand() % framebuffer.m_height;
-        framebuffer.DrawPoint(x, y, { 55,100,156,255 });
-       // framebuffer.DrawLine(x, y, x2, y2, { 255,45,67 });
-        //framebuffer.DrawRect(x, y, 40, 40, { 255,255,255 });
-        //framebuffer.DrawTrianlge(x, y, x2, y2, x3, y3, { 255,56,76,255 });
+     //framebuffer.DrawPoint(x, y, { 55,100,156,255 });
+     //framebuffer.DrawLine(x, y, x2, y2, { 25,45,67 });
+     //framebuffer.DrawRect(x, y, 40, 40, { 255,255,255 });
+     //framebuffer.DrawTrianlge(x, y, x2, y2, x3, y3, { 25,200,76,255 });
+     //framebuffer.DrawCircle(x,y , 30, { 55,100,156,255 });
+
         }
     framebuffer.Update();
     renderer.CopyFramebuffer(framebuffer);
 
     renderer.EndFrame();
-
     }
 
     

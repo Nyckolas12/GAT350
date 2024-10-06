@@ -146,3 +146,36 @@ void Framebuffer::DrawTrianlge(int x1, int y1, int x2, int y2, int x3, int y3, c
 	DrawLine(x2, y2, x3, y3, color);
 	DrawLine(x3, y3, x1, y1, color);
 }
+
+void Framebuffer::Drawpixel(int xc, int yc, int x, int y, const color_t& color)
+{
+	DrawPoint(xc + x, yc + y, color);
+	DrawPoint(xc - x, yc + y, color);
+	DrawPoint(xc + x, yc - y, color);
+	DrawPoint(xc - x, yc - y, color);
+	DrawPoint(xc + y, yc + x, color);
+	DrawPoint(xc - y, yc + x, color);
+	DrawPoint(xc + y, yc - x, color);
+	DrawPoint(xc - y, yc - x, color);
+}
+
+void Framebuffer::DrawCircle(int xc, int yc, int r, const color_t& color)
+{
+	int x = 0, y = r;
+	int d = 3 - 2 * r;
+	Drawpixel(xc, yc, x, y, color);
+	while (y >= x)
+	{
+		x++;
+		if (d > 0) {
+			y--;
+			d = d + 4 * (x - y) + 10;
+		}
+		else {
+			d = d + 4 * x + 6;
+		}
+		
+		Drawpixel(xc, yc, x, y, color);
+	}
+	
+}
