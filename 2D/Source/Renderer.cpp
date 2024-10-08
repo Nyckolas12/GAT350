@@ -32,7 +32,7 @@ bool Renderer::CreateWindow(std::string title, int width, int height)
     // create renderer
     m_renderer = SDL_CreateRenderer(m_window, -1, 0);
 
-    return true;
+    return 0;
 }
 
 void Renderer::CopyFramebuffer(const Framebuffer& framebuffer)
