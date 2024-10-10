@@ -18,7 +18,7 @@ bool Image::Load(const std::string& filename)
 	m_buffer.resize(m_width * m_height);
 
 	// copy the image data into the buffer, !!takes in number of bytes to copy!! 
-	std::memcpy(m_buffer.data(), data,m_width *m_height * sizeof (color_t)); // https://en.cppreference.com/w/cpp/string/byte/memcpy
+	std::memcpy(m_buffer.data(), data,m_width * m_height * sizeof (color_t)); // https://en.cppreference.com/w/cpp/string/byte/memcpy
 
 	// free the image data
 	stbi_image_free(data);
