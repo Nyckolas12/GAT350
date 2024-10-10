@@ -4,12 +4,7 @@
 #include <cmath>
 void PostProcess::Invert(std::vector<color_t>& buffer)
 {
-	/*for (auto& color : buffer)
-	{
-		color.r = 255 - color.r;
-		color.g = 255 - color.g;
-		color.b = 255 - color.b;
-	}*/
+	
 
 	std::for_each(buffer.begin(), buffer.end(), [](auto& color) 
 		{
@@ -266,5 +261,46 @@ void PostProcess::Edge(std::vector<color_t>& buffer, int width, int height, int 
 		color.r = c;
 		color.b = c;
 		color.g = c;
+	}
+}
+
+void PostProcess::Emboss(std::vector<color_t>& buffer, int width, int height)
+{
+	std::vector<color_t> source = buffer;
+
+	int k[3][3] =
+	{
+		{-1, -1,  0},
+		{ -1,  0,  1 },
+		{ 0,  1,  1 }
+	};
+
+	for (int i = 0; i < buffer.size(); i++)
+	{
+		int x = i % width;
+		int y = i / width;
+
+		if (x < 1 || x  >= width - 1 || y < 1 || y  >= height - 1) continue;
+
+		int r = 128;
+		int b = 128;
+		int g = 128;
+
+		for (int iy = 0; iy < 3; iy++)
+		{
+			for (int ix = 0; ix < 3; ix++)
+			{
+				color_t pixel = source[(x + ix - 1) + (y + iy - 1) * width];
+				
+
+				r += pixel.r * k[iy][ix];
+				b += pixel.b * k[iy][ix];
+				g += pixel.g * k[iy][ix ];
+			}
+		}
+		color_t& color = buffer[i];
+		color.r = static_cast<uint8_t>(Clamp(r, 0, 255));
+		color.b = static_cast<uint8_t>(Clamp(b, 0, 255));
+		color.g = static_cast<uint8_t>(Clamp(g, 0, 255));
 	}
 }

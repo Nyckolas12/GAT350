@@ -61,11 +61,13 @@ int main(int argc, char* argv[])
 		//PostProcess::Noise(framebuffer.m_buffer, 80);
 		//PostProcess::ColorBalance(framebuffer.m_buffer, 150, -50, -50);
 		//PostProcess::Threshold(framebuffer.m_buffer, 150);
+	
 		//PostProcess::BoxBlur(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::GaussianBlur(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::Sharpen(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::Sharpen(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::Edge(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height, 10);
+		PostProcess::Emboss(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		renderer->CopyFramebuffer(framebuffer);
 		framebuffer.Update();
 
