@@ -1,0 +1,3 @@
+[submodule "ThirdParty/ThirdParty/glm"]
+	path = ThirdParty/ThirdParty/glm
+	url = https://github.com/g-truc/glm.git
