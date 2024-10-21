@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "MathUtils.h"
 #include "Image.h"
+#include "Color.h"
 #include <iostream>
 Framebuffer::Framebuffer(const Renderer& renderer, int width, int height)
 {
@@ -35,8 +36,16 @@ void Framebuffer::Clear(const color_t& color)
 
 void Framebuffer::DrawPoint(int x, int y, const color_t& color)
 {
-	if (x < 0 ||x > m_width || y < 0 || y >= m_height) return;
-	m_buffer[x+y * m_width] = color;
+	color_t& dest = m_buffer[x + (y * m_width)];
+	dest = ColorBlend(color, dest);
+
+}
+
+void Framebuffer::DrawPointClip(int x, int y, const color_t& color)
+{
+	if (x >= m_width || x < 0 || y >= m_height || y < 0) return;
+	color_t& dest = m_buffer[x + (y * m_width)];
+	dest = ColorBlend(color, dest);
 }
 
 void Framebuffer::DrawRect(int x, int y, int width, int height, const color_t& color )
@@ -69,7 +78,9 @@ void Framebuffer::DrawLineSlope(int x1, int y1, int x2, int y2, const color_t& c
 		if (y1 > y2) std::swap(y1, y2);
 		for (int y = y1; y < y2; y++) 
 		{
-			m_buffer[x1 + y * m_width] = color;
+			//m_buffer[x1 + y * m_width] = color;
+			DrawPointClip(x1, y, color);
+			
 		}
 	}
 	else
@@ -84,7 +95,8 @@ void Framebuffer::DrawLineSlope(int x1, int y1, int x2, int y2, const color_t& c
 		{
 
 		int y = (int)(round(m * x) + b);
-		m_buffer[x + y * m_width] = color;
+		//m_buffer[x + y * m_width] = color;
+		DrawPointClip(x, y, color);
 
 		}
 	}
@@ -94,8 +106,8 @@ void Framebuffer::DrawLineSlope(int x1, int y1, int x2, int y2, const color_t& c
 		{
 
 			int x = (int)(round(y-b) / m);
-			m_buffer[x + y * m_width] = color;
-
+			//m_buffer[x + y * m_width] = color;
+			DrawPointClip(x, y, color);
 		}
 	}
 	}
@@ -269,7 +281,7 @@ void Framebuffer::DrawImage(int x, int y, const Image& image)
 			// check alpha, if 0 don't draw
 			if (color.a == 0 ) continue;
 			// set buffer to color
-			m_buffer[sx + sy * m_width] = color;
+			DrawPoint(sx, sy, color);
 		}
 	}
 }
