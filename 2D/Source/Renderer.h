@@ -13,7 +13,8 @@ public:
 	void EndFrame();
 	friend class Framebuffer;
 	SDL_Renderer* m_renderer{nullptr};
-
+	int GetHeight() { return m_height; }
+	int GetWidth() { return m_width; }
 
 private:
 	int m_width = 0;

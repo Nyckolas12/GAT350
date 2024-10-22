@@ -1,8 +1,13 @@
 #include "Renderer.h"
 #include "Framebuffer.h"
-#include "PostProcess.h"
 #include "Image.h"
+#include "PostProcess.h"
 #include "Color.h"
+#include "Transform.h"
+#include "ETime.h"
+#include "Input.h"
+#include "Model.h"
+#include "Camera.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,7 +16,8 @@
 
 int main(int argc, char* argv[])
 {
-
+	Time time;
+	Input input;
 	Renderer* renderer = new Renderer;
 	renderer->Initialize();
 	renderer->CreateWindow("Game Engine", 800, 600);
@@ -22,16 +28,31 @@ int main(int argc, char* argv[])
 
 	Image imageAlt;
 	imageAlt.Load("colors.png");
+
+	Camera camera(800,600);
+	camera.SetView(glm::vec3{ 0, 0, -50 }, glm::vec3{ 0 });
+	camera.SetProjection(120.0f, 800.0f / 600.0f, 0.1f, 200.0f);
+	Transform cameraTransform{ {0, 0, -20} };
+	cameraTransform.rotation = { 90,90,90 };
 	
 	
 
 	bool quit = false;
 
-	//OpenGl Math
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
+
+
+
+
+
+	Model teacupModel;
+	Transform teacupTransform{ {20, 0, 0}, glm::vec3{0, 0, 180}, glm::vec3{3} };
+	teacupModel.Load("teapot.obj");
+	teacupModel.SetColor({ 0, 0, 255, 255 });
+	SetBlendMode(BlendMode::Normal);
+
 	while (!quit)
 	{
+	
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
@@ -44,7 +65,8 @@ int main(int argc, char* argv[])
 				quit = true;
 			}
 		}
-		framebuffer.Clear(color_t{ 255,255,255,255 });
+		
+		framebuffer.Clear(color_t{ 128,128,128,255 });
 		for (int i = 0; i < 10; i++)
 		{
 			int x = rand() % framebuffer.m_width;
@@ -63,10 +85,12 @@ int main(int argc, char* argv[])
 			//framebuffer.DrawImage(x, y, image);
 			//framebuffer.DrawImage(x2, y2, image);
 		}
+
+#pragma region PostProcess
 		SetBlendMode(BlendMode::Normal);
-		framebuffer.DrawImage(50, 100, image);
-		SetBlendMode(BlendMode::Alpha);
-		framebuffer.DrawImage(50, 100, imageAlt);
+		//framebuffer.DrawImage(50, 100, image);
+		//SetBlendMode(BlendMode::Alpha);
+		//framebuffer.DrawImage(50, 100, imageAlt);
 		int mx, my;
 		SDL_GetMouseState(&mx, &my);
 		//framebuffer.DrawLinearCurve(100, 100, 200, 200, { 255,255,0,255 });
@@ -80,13 +104,31 @@ int main(int argc, char* argv[])
 		//PostProcess::Noise(framebuffer.m_buffer, 80);
 		//PostProcess::ColorBalance(framebuffer.m_buffer, 150, -50, -50);
 		//PostProcess::Threshold(framebuffer.m_buffer, 150);
-		PostProcess::Alpha(imageAlt.m_buffer, 155);
+		//PostProcess::Alpha(imageAlt.m_buffer, 155);
 		//PostProcess::BoxBlur(framebuPostProcess::Alpha(imageAlt.m_buffer, 255);ffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::GaussianBlur(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::Sharpen(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::Sharpen(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
 		//PostProcess::Edge(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height, 10);
 		//PostProcess::Emboss(framebuffer.m_buffer, framebuffer.m_width, framebuffer.m_height);
+
+#pragma endregion
+		glm::vec3 direction{ 0 };
+		int rotation = 0;
+
+		if (input.GetKeyDown(SDL_SCANCODE_RIGHT)) direction.x = 1;
+		if (input.GetKeyDown(SDL_SCANCODE_LEFT)) direction.x = -1;
+		if (input.GetKeyDown(SDL_SCANCODE_UP)) direction.y = -1;
+		if (input.GetKeyDown(SDL_SCANCODE_DOWN)) direction.y = 1;
+
+		if (input.GetKeyDown(SDL_SCANCODE_W)) direction.z = -1;
+		if (input.GetKeyDown(SDL_SCANCODE_S)) direction.z = 1;
+
+
+		cameraTransform.position += direction * 100.0f * time.GetDeltaTime();
+		camera.SetView(cameraTransform.position, cameraTransform.position + glm::vec3{ 0, 0, 1 });
+		
+		teacupModel.Draw(framebuffer, teacupTransform.GetMatrix(), camera);
 		
 		renderer->CopyFramebuffer(framebuffer);
 		framebuffer.Update();
