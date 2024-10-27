@@ -1,5 +1,5 @@
 #pragma once
-
+#include <glm/glm.hpp>
 template<typename T>
 inline T Lerp(const T& a, const T& b, float t)
 {
@@ -9,6 +9,24 @@ template<typename T>
 inline T Clamp(const T& value, const T& min, const T& max)
 {
 	return (value < min) ? min : (value > max) ? max : value;
+}
+
+inline glm::vec3 Cross(const glm::vec3& v1, const glm::vec3& v2)
+{
+	glm::vec3 result;
+
+	result.x = v1.y * v2.z - v2.y * v1.z;
+	result.y = v1.z * v2.x - v2.z * v1.x;
+	result.z = v1.x * v2.y - v2.x * v1.y;
+
+	return result;
+
+}
+
+inline bool approximately(float value1, float value2)
+{
+	// check if the difference between the values is less than epsilon
+	return (std::abs(value1 - value2) < FLT_EPSILON);
 }
 
  inline void QuadraticPoint(int x1, int y1, int x2, int y2, int x3, int y3, float t, int& x, int& y)
