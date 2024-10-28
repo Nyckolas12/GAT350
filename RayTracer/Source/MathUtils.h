@@ -23,11 +23,24 @@ inline glm::vec3 Cross(const glm::vec3& v1, const glm::vec3& v2)
 
 }
 
+
+inline float Dot(const glm::vec3& v1, const glm::vec3& v2)
+{
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+inline glm::vec3 Reflect(const glm::vec3& i, const glm::vec3& n)
+{
+	return i - n * (Dot(n, i) * 2.0f);;
+}
+
 inline bool approximately(float value1, float value2)
 {
 	// check if the difference between the values is less than epsilon
 	return (std::abs(value1 - value2) < FLT_EPSILON);
 }
+
+
 
  inline void QuadraticPoint(int x1, int y1, int x2, int y2, int x3, int y3, float t, int& x, int& y)
 {
