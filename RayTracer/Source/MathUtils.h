@@ -34,6 +34,7 @@ inline glm::vec3 Reflect(const glm::vec3& i, const glm::vec3& n)
 	return i - n * (Dot(n, i) * 2.0f);;
 }
 
+
 inline bool approximately(float value1, float value2)
 {
 	// check if the difference between the values is less than epsilon

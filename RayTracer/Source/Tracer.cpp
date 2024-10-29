@@ -4,7 +4,7 @@
 #include "Scene.h"
 #include "Color.h"
 
-color3_t Tracer::Trace(Scene& scene, const ray_t& ray, float minDistance, float maxDistance)
+color3_t Tracer::Trace(Scene& scene, const ray_t& ray, float minDistance, float maxDistance, int depth)
 {
 	raycastHit_t raycastHit;
 	float closestDistance = maxDistance;
@@ -28,7 +28,7 @@ color3_t Tracer::Trace(Scene& scene, const ray_t& ray, float minDistance, float 
 		ray_t scatter;
 		if (raycastHit.material.lock()->Scatter(ray, raycastHit, attenuation, scatter))
 		{
-			return attenuation * Trace(scene, scatter, minDistance, maxDistance);
+			return attenuation * Trace(scene, scatter, minDistance, maxDistance, depth - 1);
 			/*return raycastHit.material.lock()->GetColor();*/
 		}
 	}
@@ -37,6 +37,8 @@ color3_t Tracer::Trace(Scene& scene, const ray_t& ray, float minDistance, float 
 	glm::vec3 direction = glm::normalize(ray.direction);
 	float t = (direction.y + 1) * 0.5f;
 	 color = Lerp(color3_t{ 1,1,0 }, color3_t{ 1.0f,0.5f,0.5f }, t);
+
+	 if (depth == 0) return color3_t{ 0 };
 
 	return color;
 }

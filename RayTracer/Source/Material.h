@@ -34,4 +34,14 @@ protected:
 	float m_fuzz = 0;
 };
 
-//memeber function declared with "override" does not override a base class member 
+class Emissive : public Material
+{
+public:
+	Emissive(const color3_t& albedo, float intensity = 1) : Material{ albedo }, m_intensity{ intensity } {}
+	virtual bool Scatter(const ray_t& ray, const raycastHit_t& raycastHit, color3_t& attenuation, ray_t& scattered) override;
+	color3_t GetEmissive() { return m_albedo * m_intensity; }
+
+private:
+	float m_intensity{ 1 };
+};
+
