@@ -24,7 +24,4 @@ bool Metal::Scatter(const ray_t& ray, const raycastHit_t& raycastHit, color3_t& 
         return glm::dot(scattered.direction, raycastHit.normal) > 0;
 }
 
-bool Emissive::Scatter(const ray_t& ray, const raycastHit_t& raycastHit, color3_t& attenuation, ray_t& scattered)
-{
-    return false;
-}
+
