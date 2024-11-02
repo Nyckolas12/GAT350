@@ -46,3 +46,14 @@ private:
 	float m_intensity{ 0 };
 };
 
+class Dielectric : public Material {
+public:
+	Dielectric(const glm::vec3& albedo, float ri) : Material(albedo), m_ri(ri) {}
+
+	bool Scatter(const ray_t& ray, const raycastHit_t& raycastHit, color3_t& attenuation, ray_t& scatter) override;
+
+protected:
+	
+	float m_ri = 0;
+};
+

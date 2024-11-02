@@ -18,12 +18,14 @@
 #include <SDL.h>
 #include <iostream>
 #include "Random.h"
+#include "Triangle.h"
 
 int main(int argc, char* argv[])
 {
 	srand((unsigned int)time(NULL));
 	Time time;
 	Input input;
+	bool quit = false;
 
 	Renderer* renderer = new Renderer;
 	renderer->Initialize();
@@ -31,7 +33,7 @@ int main(int argc, char* argv[])
 	Framebuffer framebuffer(*renderer, renderer->GetWidth(), renderer->GetHeight());
 	
 	Camera camera{70.0f,framebuffer.m_width / (float)framebuffer.m_height};
-	camera.SetView({0,0,-20},{0,0,0});
+	camera.SetView({0,0,-5.0f},{0,0,0});
 
 	SetBlendMode(BlendMode::Normal);
 	
@@ -40,18 +42,22 @@ int main(int argc, char* argv[])
 	std::shared_ptr<Material> material = std::make_unique<Lambertian>(color3_t{ 1,0,1 });
 	std::shared_ptr<Material> planematerial = std::make_unique<Lambertian>(color3_t{ 0.5f,1,0.5f });
 	std::shared_ptr<Material> gray = std::make_shared<Lambertian>(color3_t{ 0.5f });
-	std::shared_ptr<Material> red = std::make_shared<Emissive>(color3_t{ 1, 0, 0 },1.5f);
-	std::shared_ptr<Material> blue = std::make_shared<Emissive>(color3_t{ 0, 0, 1 },0.7f);
+	std::shared_ptr<Material> red = std::make_shared<Dielectric>(color3_t{ 1, 1, 1 },1.33f);
+	std::shared_ptr<Material> blue = std::make_shared<Dielectric>(color3_t{ 1, 1, 1 },1.33f);
 	std::shared_ptr<Material> green = std::make_shared<Metal>(color3_t{ 0, 1, 0 }, 0.3f);
 	
 	std::vector<std::shared_ptr<Material>> materials = { red, blue };
+	
 
 
 
 	std::unique_ptr<Sphere> object = std::make_unique<Sphere>(glm::vec3{ 0 }, 2.0f, material);
 	auto plane = std::make_unique<Plane>(glm::vec3{ 0, -20, 0 }, glm::vec3{ 0, 2.0f, 0 }, planematerial);
-	scene.AddObject(std::move(object));
-	scene.AddObject(std::move(plane));
+	auto triangle = std::make_unique<Triangle>(random(glm::vec3{ -5 }, glm::vec3{ 5 }), random(glm::vec3{ -5 }, glm::vec3{ 5 }), random(glm::vec3{ -5 }, glm::vec3{ 5 }), material);
+	scene.AddObject(std::move(triangle));
+	//scene.AddObject(std::move(object));
+	//scene.AddObject(std::move(plane));
+	
 
 
 	// Function to select a random material from the vector
@@ -63,24 +69,11 @@ int main(int argc, char* argv[])
 		auto random_material = getRandomMaterial(); // Get a random material
 
 		
-		auto sphere = std::make_unique<Sphere>(random_position, random_radius, random_material);
-		scene.AddObject(std::move(sphere));
+		//auto sphere = std::make_unique<Sphere>(random_position, random_radius, random_material);
+		//scene.AddObject(std::move(sphere));
 	}
 
-	bool quit = false;
 
-
-
-	
-
-	
-	
-
-
-	//Model teacupModel;
-	//Transform teacupTransform{ {20, 1, 1}, glm::vec3{0, 0, 180}, glm::vec3{3} };
-	//teacupModel.Load("teapot.obj");
-	//teacupModel.SetColor({ 0, 0, 255, 255 });
 
 	while (!quit)
 	{
@@ -102,7 +95,7 @@ int main(int argc, char* argv[])
 
 		
 		
-		scene.Render(framebuffer, camera, 10, 5);
+		scene.Render(framebuffer, camera, 100, 50);
 		//tracer.Render(framebuffer, camera);
 		
 		

@@ -5,7 +5,7 @@
 class SceneObject
 {
 public:
-	//SceneObject() = default;
+	SceneObject() = default;
 	SceneObject(std::shared_ptr< Material> material) : m_material{ material } {}
 
 	virtual bool Hit(const ray_t& ray, raycastHit_t& raycastHit, float minDistance, float maxDistance) = 0;
