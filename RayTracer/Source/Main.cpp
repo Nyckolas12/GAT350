@@ -49,16 +49,18 @@ int main(int argc, char* argv[])
 	std::vector<std::shared_ptr<Material>> materials = { red, blue };
 	
 
-
+	auto model = std::make_unique<Model>(material);
+	model->Load("teapot.obj");
+	scene.AddObject(std::move(model));
+	
 
 	std::unique_ptr<Sphere> object = std::make_unique<Sphere>(glm::vec3{ 0 }, 2.0f, material);
 	auto plane = std::make_unique<Plane>(glm::vec3{ 0, -20, 0 }, glm::vec3{ 0, 2.0f, 0 }, planematerial);
 	auto triangle = std::make_unique<Triangle>(random(glm::vec3{ -5 }, glm::vec3{ 5 }), random(glm::vec3{ -5 }, glm::vec3{ 5 }), random(glm::vec3{ -5 }, glm::vec3{ 5 }), material);
-	scene.AddObject(std::move(triangle));
+	//scene.AddObject(std::move(triangle));
 	//scene.AddObject(std::move(object));
-	//scene.AddObject(std::move(plane));
+	scene.AddObject(std::move(plane));
 	
-
 
 	// Function to select a random material from the vector
 	auto getRandomMaterial = [&materials]() -> std::shared_ptr<Material> {int index = static_cast<int>(randomf(0, materials.size())); return materials[index];};
@@ -95,7 +97,7 @@ int main(int argc, char* argv[])
 
 		
 		
-		scene.Render(framebuffer, camera, 100, 50);
+		scene.Render(framebuffer, camera, 10, 5);
 		//tracer.Render(framebuffer, camera);
 		
 		

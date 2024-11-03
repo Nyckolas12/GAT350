@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "Triangle.h"
 /// <summary>
 /// Convert point from model space to world space
 /// </summary>
@@ -61,4 +62,20 @@ bool Model::Load(const std::string& filename)
 	}
 	stream.close();
 	return true;
+}
+
+bool Model::Hit(const ray_t& ray, raycastHit_t& raycastHit, float minDistance, float maxDistance)
+{
+	// check cast ray with mesh triangles 
+
+	for (size_t i = 0; i < m_verticies.size(); i += 3)
+	{
+		Triangle triangle(m_verticies[i], m_verticies[i + 1], m_verticies[i + 2], m_material);
+		if (triangle.Hit(ray, raycastHit, minDistance, maxDistance))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

@@ -12,7 +12,7 @@ public:
 
 	std::weak_ptr< Material> GetMaterial() { return m_material; }
 
-private:
+protected:
 	std::shared_ptr< Material> m_material;
 
 };
