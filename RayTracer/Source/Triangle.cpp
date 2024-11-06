@@ -3,9 +3,36 @@
 
 bool Triangle::Hit(const ray_t& ray, raycastHit_t& raycastHit, float minDistance, float maxDistance)
 {
-    // set edges of the triangle
+    // std::cout << "Triangle hit at distance: " << t << std::endl;
+         // set raycast hit
+
+    float t;
+    if (!Raycast(ray, m_local_m_v1, m_local_m_v2, m_local_m_v3, minDistance, maxDistance, t)) {
+        return false;
+    }
+
+    raycastHit.distance = t;
+    raycastHit.point = ray.At(t);
     glm::vec3 edge1 = m_v2 - m_v1;
     glm::vec3 edge2 = m_v3 - m_v1;
+    raycastHit.normal = glm::normalize(Cross(edge1, edge2));
+    raycastHit.material = GetMaterial();
+
+    return true;
+}
+
+void Triangle::Update()
+{
+    m_v1 = m_transform * glm::vec4{ m_local_m_v1,1 };
+    m_v2 = m_transform * glm::vec4{m_local_m_v2, 1};
+    m_v3 = m_transform * glm::vec4{ m_local_m_v3, 1 };
+}
+
+bool Triangle::Raycast(const ray_t& ray, const glm::vec3 v1, const glm::vec3 v2, const glm::vec3 v3, float minDistance, float maxDistance, float& t)
+{
+    // set edges of the triangle
+    glm::vec3 edge1 = v2 - v1;
+    glm::vec3 edge2 = v3 - v1;
 
     // calculate perpendicular vector, determine how aligned the ray is with the triangle plane
     glm::vec3 pvec = Cross(ray.direction, edge2);//<generate perpendicular vector with cross product ray direction and edge2>;
@@ -22,14 +49,12 @@ bool Triangle::Hit(const ray_t& ray, raycastHit_t& raycastHit, float minDistance
     float invDet = 1 / determinant;
 
     // create direction vector from the triangle first vertex to the ray origin
-    glm::vec3 tvec = ray.origin - m_v1;
+    glm::vec3 tvec = ray.origin - v1;
     // Calculate u parameter for barycentric coordinates
     float u = glm::dot(tvec, pvec) * invDet;
     // Check if u is outside the bounds of the triangle, no intersection
     if (u < 0 or u > 1)
     {
-        
-
         return false;
     }
 
@@ -45,19 +70,14 @@ bool Triangle::Hit(const ray_t& ray, raycastHit_t& raycastHit, float minDistance
     }
 
     // Calculate intersection distance and check range
-    float t = glm::dot(edge2, qvec) * invDet;
+     t = glm::dot(edge2, qvec) * invDet;
     //std::cout << "Intersection distance (t): " << t << std::endl;
     if (t >= minDistance && t <= maxDistance)
     {
-       // std::cout << "Triangle hit at distance: " << t << std::endl;
-        // set raycast hit
-        raycastHit.distance = t;
-        raycastHit.point = ray.At(t);
-        raycastHit.normal = glm::normalize(Cross(edge1, edge2));
-        raycastHit.material = GetMaterial();
-
         return true;
     }
 
     return false;
 }
+
+

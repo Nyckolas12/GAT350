@@ -166,6 +166,7 @@
     <ClInclude Include="Source\Actor.h" />
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\Color.h" />
+    <ClInclude Include="Source\ETime.h" />
     <ClInclude Include="Source\Framebuffer.h" />
     <ClInclude Include="Source\Image.h" />
     <ClInclude Include="Source\Input.h" />

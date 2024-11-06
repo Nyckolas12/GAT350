@@ -6,9 +6,19 @@
 #include <iostream>
 #include "Tracer.h"
 #include "Random.h"
+#include "ETime.h"
+
+void Scene::Update()
+{
+	for (auto& object : m_objects)
+	{
+		object->Update();
+	}
+}
 
 void Scene::Render(Framebuffer& framebuffer, const Camera& camera, int numSamples, int depth)
 {
+	Time frametime;
 	for (int y = 0; y < framebuffer.m_height; y++)
 	{
 		for (int x = 0; x < framebuffer.m_width; x++)
@@ -37,5 +47,8 @@ void Scene::Render(Framebuffer& framebuffer, const Camera& camera, int numSample
 		}
 
 		std::cout << "y: " << y << std::endl;
+		std::cout << "frame time: " << frametime.GetElapsedTime() << std::endl;
 	}
 }
+
+
