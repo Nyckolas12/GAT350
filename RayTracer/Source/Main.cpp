@@ -36,18 +36,18 @@ int main(int argc, char* argv[])
 	Framebuffer framebuffer(*renderer, renderer->GetWidth(), renderer->GetHeight());
 	
 	Camera camera{70.0f,framebuffer.m_width / (float)framebuffer.m_height};
-	camera.SetView({0,0,-5.0f},{0,0,0});
+	camera.SetView({ 0, 0, -10 },{0,0,0});
 
 	SetBlendMode(BlendMode::Normal);
 	
 	
 	Scene scene;
-	InitScene01(scene,camera);
+	InitScene(scene);
 	scene.Update();
 	
 
 	framebuffer.Clear(ColorConvert(color4_t{ 128,128,128,255 }));
-	scene.Render(framebuffer, camera, 100, 350);
+	scene.Render(framebuffer, camera, 10, 10);
 	//tracer.Render(framebuffer, camera);
 
 	while (!quit)
@@ -88,52 +88,47 @@ void InitScene(Scene& scene)
 	std::shared_ptr<Material> material = std::make_unique<Lambertian>(color3_t{ 1,0,1 });
 	std::shared_ptr<Material> planematerial = std::make_unique<Lambertian>(color3_t{ 0.5f,1,0.5f });
 	std::shared_ptr<Material> gray = std::make_shared<Lambertian>(color3_t{ 0.5f });
-	std::shared_ptr<Material> red = std::make_shared<Lambertian>(color3_t{ 1, 0, 0 });
+	std::shared_ptr<Material> red = std::make_shared<Lambertian>(color3_t{ HSVtoRGB(0.0f, 1.0f, 1.0f) });
 	std::shared_ptr<Material> blue = std::make_shared<Dielectric>(color3_t{ 1, 1, 1 }, 1.33f);
-	std::shared_ptr<Material> green = std::make_shared<Lambertian>(color3_t{ 0, 1, 0 });
-	std::shared_ptr<Material> white = std::make_shared<Lambertian>(color3_t{ 255, 255, 255 });
-	std::shared_ptr<Material> light = std::make_shared<Emissive>(color3_t{ 1, 0.5f, 0 },1.34);
+	std::shared_ptr<Material> green = std::make_shared<Lambertian>(HSVtoRGB(120.0f, 1.0f, 1.0f));
+	std::shared_ptr<Material> white = std::make_shared<Lambertian>(HSVtoRGB(0.0f, 0.0f, 1.0f));
+	std::shared_ptr<Material> light = std::make_shared<Emissive>(HSVtoRGB(0.0f, 0.0f, 1.0f), 10.0f);
 
 	std::vector<std::shared_ptr<Material>> materials = { red, blue };
-
-
-	auto model = std::make_unique<Model>(Transform{ glm::vec3{0, 0, 0 }, glm::vec3{0,20, 0},glm::vec3{ 1} }, material);
-	model->Load("teapot.obj");
-	scene.AddObject(std::move(model));
-
-	/*One light source in the center of a white ceiling
-		A green right wall
-		A red left wall
-		A white back wall
-		A white floor*/
+	
+	
 	std::unique_ptr<Sphere> object = std::make_unique<Sphere>(glm::vec3{ 0 }, 2.0f, red);
 
+	auto lightSource = std::make_unique<Sphere>(glm::vec3{ 0, 5, -5 }, 1.0f, white);
+	scene.AddObject(std::move(lightSource));
 
-	auto WhitePlaneFloor = std::make_unique<Plane>(Transform{ glm::vec3{0,-5,-5}},white);
-	auto WhitePlaneBackWall = std::make_unique<Plane>(Transform{ glm::vec3{5,5,5}, glm::vec3 {100} }, white);
-	auto RedPlaneLeft = std::make_unique<Plane>(Transform{ glm::vec3{-5,5,0}, glm::vec3{100} }, red);
-	auto GreenPlaneRight = std::make_unique<Plane>(Transform{ glm::vec3{0,-2,0},glm::vec3{0,0,20},glm::vec3{1,1,1} }, green);
-	auto triangle = std::make_unique<Triangle>(glm::vec3{ -2, 0, 0 }, glm::vec3{ 0, 2, 0 }, glm::vec3{ 2, 0, 0 }, material);
-	//scene.AddObject(std::move(triangle));
-	//scene.AddObject(std::move(object));
-	//scene.AddObject(std::move(WhitePlaneFloor));
-	//scene.AddObject(std::move(WhitePlaneBackWall));
-	//scene.AddObject(std::move(RedPlaneLeft));
+	// Floor (white)
+	auto WhitePlaneFloor = std::make_unique<Plane>(Transform{ glm::vec3{0, -5, 5}, glm::vec3{0,0,0 } }, white);
+	scene.AddObject(std::move(WhitePlaneFloor));
 
+	// Back wall (white)
+	auto WhitePlaneBackWall = std::make_unique<Plane>(Transform{ glm::vec3{0, 0, 5 }, glm::vec3{ -90, 0, 0 }, glm::vec3{ 1 } }, white);
+	scene.AddObject(std::move(WhitePlaneBackWall));
 
-	// Function to select a random material from the vector
-	auto getRandomMaterial = [&materials]() -> std::shared_ptr<Material> {int index = static_cast<int>(randomf(0, materials.size())); return materials[index]; };
+	// Left wall (red)
+	auto RedPlaneLeft = std::make_unique<Plane>(Transform{ glm::vec3{ -10 , 0 , 0 }, glm::vec3{ 0, 0, 90 }, glm::vec3{ 1 } }, red);
+	scene.AddObject(std::move(RedPlaneLeft));
 
-	for (int i = 0; i < 10; ++i) {
-		glm::vec3 random_position = random(glm::vec3{ -10.0f, -10.0f, -10.0f }, glm::vec3{ 10.0f, 10.0f, 10.0f });
-		float random_radius = randomf(0.5f, 2.0f);  // Random radius between 0.5 and 2.0
-		auto random_material = getRandomMaterial(); // Get a random material
+	// Right wall (green)
+	auto GreenPlaneRight = std::make_unique<Plane>(Transform{ glm::vec3{ 10 , 0 , 0 }, glm::vec3{ 0, 0, -90 }, glm::vec3{ 1 } }, green);
+	scene.AddObject(std::move(GreenPlaneRight));
 
+	// Ceiling light source
+	auto Ceiling = std::make_unique<Plane>(Transform{ glm::vec3{0, 5, 5}, glm::vec3{180, 0, 0} }, white);
+	scene.AddObject(std::move(Ceiling));
+	
+	auto CubeLight = std::make_unique<Model>(Transform{ { 0, 6, 0 }, glm::vec3{ 0 }, glm::vec3{ 2 } }, light);
+	CubeLight->Load("models/cube.obj");
+	scene.AddObject(std::move(CubeLight));
 
-		//auto sphere = std::make_unique<Sphere>(random_position, random_radius, random_material);
-		//scene.AddObject(std::move(sphere));
-	}
-
+	auto model = std::make_unique<Model>(Transform{ { -2, -2, 1 }, { 0, 0, 0 }, glm::vec3{ 0.55f } }, std::make_shared<Metal>(HSVtoRGB(285, 0.85f, 0.75f), 0.8f));
+	model->Load("models/teapot.obj");
+	scene.AddObject(std::move(model));
 
 }
 

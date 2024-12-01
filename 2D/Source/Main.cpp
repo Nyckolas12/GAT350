@@ -8,16 +8,19 @@
 #include "Input.h"
 #include "Model.h"
 #include "Camera.h"
-
+#include "Shader.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL.h>
 #include <iostream>
+#include "Actor.h"
 
 int main(int argc, char* argv[])
 {
 	Time time;
 	Input input;
+	input.Initialize();
+
 	Renderer* renderer = new Renderer;
 	renderer->Initialize();
 	renderer->CreateWindow("Game Engine", 800, 600);
@@ -30,25 +33,39 @@ int main(int argc, char* argv[])
 	imageAlt.Load("colors.png");
 
 	SetBlendMode(BlendMode::Normal);
-	Camera camera(800,600);
-	camera.SetView(glm::vec3{ 0, 0, -50 }, glm::vec3{ 0 });
+	Camera camera(renderer->GetWidth(), renderer->GetHeight());
+	camera.SetView(glm::vec3{ 0, 40, -50 }, glm::vec3{ 1 });
 	camera.SetProjection(120.0f, 800.0f / 600.0f, 0.1f, 200.0f);
-	Transform cameraTransform{ {0, 0, -20} };
-	cameraTransform.rotation = { 90,90,90 };
+	Transform cameraTransform{ {0, -3, -17} };
+	//cameraTransform.rotation = { 90,90,90 };
 	
-	
+	//shader
+	VertexShader::uniforms.view = camera.GetView();
+	VertexShader::uniforms.projection = camera.GetProjection();
+	VertexShader::uniforms.ambient = color3_t{ 0.5f };
+	//light
+	//VertexShader::uniforms.light.position = glm::vec3{ 10, 40, -10 };
+	VertexShader::uniforms.light.direction = glm::vec3{ 0, -10, 0 }; // light pointing down
+	VertexShader::uniforms.light.color = color3_t{ 1 };
+
+	Shader::framebuffer = &framebuffer;
 
 	bool quit = false;
 
+	std::shared_ptr<Model> teacupModel = std::make_shared<Model>();
+	teacupModel->Load("models/sphere.obj");
+	teacupModel->SetColor({ 0,0,1,1 });
+	Transform teacupTransform{ {2, 1, 1}, glm::vec3{0, 0, 180}, glm::vec3{1} };
+	std::vector<std::unique_ptr<Actor>> actors;
+	auto teacupActor = std::make_unique<Actor>(teacupTransform, teacupModel);
+	actors.push_back(std::move(teacupActor));
+	for (auto& actor : actors)
+	{
+		actor->GetTransform().rotation.y += time.GetDeltaTime() * 90;
+		actor->Draw();
+	}
 
 
-
-
-
-	Model teacupModel;
-	Transform teacupTransform{ {20, 1, 1}, glm::vec3{0, 0, 180}, glm::vec3{3} };
-	teacupModel.Load("teapot.obj");
-	teacupModel.SetColor({ 0, 0, 255, 255 });
 
 	while (!quit)
 	{
@@ -65,7 +82,10 @@ int main(int argc, char* argv[])
 				quit = true;
 			}
 		}
-		
+	
+		input.Update();
+		time.Tick();
+
 		framebuffer.Clear(color_t{ 128,128,128,255 });
 		for (int i = 0; i < 10; i++)
 		{
@@ -116,19 +136,31 @@ int main(int argc, char* argv[])
 		glm::vec3 direction{ 0 };
 		int rotation = 0;
 
-		if (input.GetKeyDown(SDL_SCANCODE_RIGHT)) direction.x = 1;
+		if (input.GetKeyDown(SDL_SCANCODE_RIGHT))
+		{
+			direction.x = 1;
+		}
 		if (input.GetKeyDown(SDL_SCANCODE_LEFT)) direction.x = -1;
 		if (input.GetKeyDown(SDL_SCANCODE_UP)) direction.y = -1;
 		if (input.GetKeyDown(SDL_SCANCODE_DOWN)) direction.y = 1;
 
 		if (input.GetKeyDown(SDL_SCANCODE_W)) direction.z = -1;
 		if (input.GetKeyDown(SDL_SCANCODE_S)) direction.z = 1;
+		if (input.GetKeyDown(SDL_SCANCODE_Q)) rotation = 1;
+		if (input.GetKeyDown(SDL_SCANCODE_E)) rotation = -1;
 
 
-		cameraTransform.position += direction * 100.0f * time.GetDeltaTime();
-		camera.SetView(cameraTransform.position, cameraTransform.position + glm::vec3{ 0, 0, 1 });
-		
-		teacupModel.Draw(framebuffer, teacupTransform.GetMatrix(), camera);
+		glm::vec3 offset = cameraTransform.GetMatrix() * glm::vec4{ direction, 0 };
+		cameraTransform.position += offset * 100.0f * time.GetDeltaTime();
+		cameraTransform.rotation.y = input.GetMousePosition().x * 0.1f;
+		cameraTransform.rotation.x = input.GetMousePosition().y * 0.1f;
+
+
+		//cameraTransform.position += direction * 100.0f * time.GetDeltaTime();
+		camera.SetView(cameraTransform.position, cameraTransform.position + cameraTransform.GetForward());
+		VertexShader::uniforms.view = camera.GetView();
+
+		teacupModel->Draw();
 		
 		renderer->CopyFramebuffer(framebuffer);
 		framebuffer.Update();

@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "Framebuffer.h"
 #include "Camera.h"
+#include "Shader.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -9,29 +10,9 @@
 /// </summary>
 /// <param name="framebuffer">The buffer we are drawing to</param>
 /// <param name="model">the model matrix that holds the points in model space</param>
-void Model::Draw(Framebuffer& framebuffer, const glm::mat4& model, const Camera& camera)
+void Model::Draw()
 {
-	for (int i = 0; i < m_verticies.size() - 2; i += 3)
-	{
-		//
-		Vertex_t p1 = model * glm::vec4{ m_verticies[i], 1 };
-		Vertex_t p2 = model * glm::vec4{ m_verticies[i + 1], 1 };
-		Vertex_t p3 = model * glm::vec4{ m_verticies[i + 2], 1 };
-
-		p1 = camera.ModelToView(p1);
-		p2 = camera.ModelToView(p2);
-		p3 = camera.ModelToView(p3);
-
-		glm::ivec2 s1 = camera.ToScreen(p1);
-		glm::ivec2 s2 = camera.ToScreen(p2);
-		glm::ivec2 s3 = camera.ToScreen(p3);
-
-		if (s1.x == -1 || s1.y == -1 || s2.x == -1 || s2.y == -1 || s3.x == -1 || s3.y == -1) {
-			continue;
-		}
-
-		framebuffer.DrawTrianlge(s1.x, s1.y, s2.x, s2.y, s3.x, s3.y, m_color);
-	}
+	Shader::Draw(m_vb);
 }
 
 bool Model::Load(const std::string& filename)
@@ -42,18 +23,28 @@ bool Model::Load(const std::string& filename)
 		std::cerr << "Error opening ifstream" << std::endl;
 		return false;
 	}
-	Verticies_t vertices;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
 	
 	std::string line;
 	while (std::getline(stream, line)) {
 		//read in vertex positions
-		if (line.substr(0, 2) == "v ") {
+		if (line.substr(0,2).find("v ") == 0) {
 			std::istringstream sstream{ line.substr(2) };
 			glm::vec3 position;
 			sstream >> position.x;
 			sstream >> position.y;
 			sstream >> position.z;
 			vertices.push_back(position);
+		}
+		else if ((line.substr(0,3).find("vn ") == 0)) {
+			// read in vertext normal
+			std::istringstream sstream{ line.substr(3) };
+			glm::vec3 normal;
+			sstream >>normal.x;
+			sstream >>normal.y;
+			sstream >>normal.z;
+			normals.push_back(normal);
 		}
 		else if (line.substr(0, 2) == "f ") {
 			std::istringstream sstream{ line.substr(2) };
@@ -72,9 +63,12 @@ bool Model::Load(const std::string& filename)
 					}
 					i++;
 				}
-				if (index[0] != 0) {
-					glm::vec3 position = vertices[index[0] - 1];
-					m_verticies.push_back(position);
+				if (index[0] && index[1]) {
+					
+					vertex_t vertex;
+					vertex.position = vertices[index[0] - 1];
+					vertex.normal = (index[2]) ? normals[index[2] - 1] : glm::vec3{ 1 };
+					m_vb.push_back(vertex);
 				}
 			}
 		}
