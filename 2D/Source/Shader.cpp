@@ -3,6 +3,8 @@
 #include "Rasterizer.h"
 
 Framebuffer* Shader::framebuffer{ nullptr };
+Shader::eFrontFace Shader::front_face = Shader::CW;   // Default winding order
+Shader::eCullMode Shader::cull_mode = Shader::NONE;     // Default cull mode
 
 void Shader::Draw(const vertexbuffer_t& vb)
 {
@@ -27,6 +29,29 @@ void Shader::Draw(const vertexbuffer_t& vb)
 		if (!ToScreen(v0, s0)) continue;
 		if (!ToScreen(v1, s1)) continue;
 		if (!ToScreen(v2, s2)) continue;
+
+
+		// Compute signed area (cross product)
+		float z = cross(s1 - s0, s2 - s0);
+		if (std::fabs(z) < std::numeric_limits<float>::epsilon()) continue;
+		//Determines if the triangle should be culled based on winding order and cull mode
+		//bool isFrontFacing = (z > 0 && front_face == CCW) || (z < 0 && front_face == CW);
+		
+		// cull faces
+		switch (cull_mode)
+		{
+		case FRONT:
+			if (front_face == CCW && z > 0) continue; // Skip front-facing triangles
+			if (front_face == CW && z < 0) continue; // Skip front-facing triangles
+			break;
+		case BACK:
+			if (front_face == CCW && z < 0) continue; // Skip back-facing triangles
+			if (front_face == CW && z > 0) continue; // Skip back-facing triangles
+			break;
+		case NONE:
+			// No culling, render all faces
+			break;
+		}
 
 		// rasterization
 		Rasterizer::Triangle(*framebuffer,s0,s1,s2,v0,v1,v2);

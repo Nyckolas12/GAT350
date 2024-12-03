@@ -36,26 +36,26 @@ int main(int argc, char* argv[])
 	Camera camera(renderer->GetWidth(), renderer->GetHeight());
 	camera.SetView(glm::vec3{ 0, 40, -50 }, glm::vec3{ 1 });
 	camera.SetProjection(120.0f, 800.0f / 600.0f, 0.1f, 200.0f);
-	Transform cameraTransform{ {0, -3, -17} };
+	Transform cameraTransform{ {2, -3, -17} };
 	//cameraTransform.rotation = { 90,90,90 };
 	
 	//shader
 	VertexShader::uniforms.view = camera.GetView();
 	VertexShader::uniforms.projection = camera.GetProjection();
-	VertexShader::uniforms.ambient = color3_t{ 0.5f };
+	//VertexShader::uniforms.ambient = color3_t{ 0.1f };
 	//light
-	//VertexShader::uniforms.light.position = glm::vec3{ 10, 40, -10 };
-	VertexShader::uniforms.light.direction = glm::vec3{ 0, -10, 0 }; // light pointing down
-	VertexShader::uniforms.light.color = color3_t{ 1 };
+	VertexShader::uniforms.light.position = glm::vec3{ -40, 40, -5 };
+	VertexShader::uniforms.light.direction = glm::vec3{ 10, -100, 0 }; // light pointing down
+	VertexShader::uniforms.light.color = color3_t{ 1,0,1 };
 
 	Shader::framebuffer = &framebuffer;
 
 	bool quit = false;
 
 	std::shared_ptr<Model> teacupModel = std::make_shared<Model>();
-	teacupModel->Load("models/sphere.obj");
+	teacupModel->Load("models/bunny.obj");
 	teacupModel->SetColor({ 0,0,1,1 });
-	Transform teacupTransform{ {2, 1, 1}, glm::vec3{0, 0, 180}, glm::vec3{1} };
+	Transform teacupTransform{ {2, 1, 1}, glm::vec3{20, 0, -270}, glm::vec3{2} };
 	std::vector<std::unique_ptr<Actor>> actors;
 	auto teacupActor = std::make_unique<Actor>(teacupTransform, teacupModel);
 	actors.push_back(std::move(teacupActor));
@@ -134,11 +134,12 @@ int main(int argc, char* argv[])
 
 #pragma endregion
 		glm::vec3 direction{ 0 };
-		int rotation = 0;
+		int rotation{ 0 };
 
 		if (input.GetKeyDown(SDL_SCANCODE_RIGHT))
 		{
 			direction.x = 1;
+			rotation = 1;
 		}
 		if (input.GetKeyDown(SDL_SCANCODE_LEFT)) direction.x = -1;
 		if (input.GetKeyDown(SDL_SCANCODE_UP)) direction.y = -1;
